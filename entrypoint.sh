@@ -33,7 +33,7 @@ secret_not_found() {
 }
 
 # Install rust and toolchain
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 WRANGLER_VERSION=2
 
