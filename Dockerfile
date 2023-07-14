@@ -1,8 +1,8 @@
-FROM rust
+FROM rust:alpine
 ENV XDG_CONFIG_HOME /github/workspace
 ENV WRANGLER_HOME /github/workspace
 
-RUN apt-get update && apt-get install -y nodejs npm
+RUN apk add --no-cache nodejs npm
 
 RUN rustup target add wasm32-unknown-unknown
 
