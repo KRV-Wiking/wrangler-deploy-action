@@ -32,9 +32,6 @@ secret_not_found() {
   exit 1
 }
 
-# Install rust and toolchain
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
 WRANGLER_VERSION=2
 
 # If no Wrangler version is specified install v2.
