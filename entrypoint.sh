@@ -24,13 +24,16 @@ execute_commands() {
     eval "${CHUNKS[@]}"
 
     CHUNKS=()
-  done <<< "$COMMANDS"
+  done <<<"$COMMANDS"
 }
 
 secret_not_found() {
   echo "::error::Specified secret \"$1\" not found in environment variables."
   exit 1
 }
+
+# Install rust and toolchain
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 WRANGLER_VERSION=2
 
@@ -73,7 +76,7 @@ if [ -n "$INPUT_APIKEY" ] && [ -n "$INPUT_EMAIL" ]; then
     echo "::error::Wrangler v2 does not support using the API Key. You should instead use an API token."
     exit 1
   fi
-  
+
   export API_CREDENTIALS="Email and API Key"
 fi
 
@@ -84,37 +87,32 @@ if [ -n "$INPUT_ACCOUNTID" ]; then
   else
     export CLOUDFLARE_ACCOUNT_ID="$INPUT_ACCOUNTID"
   fi
-  
+
 fi
 
-if [ -n "$INPUT_APIKEY" ] && [ -z "$INPUT_EMAIL" ]
-then
+if [ -n "$INPUT_APIKEY" ] && [ -z "$INPUT_EMAIL" ]; then
   echo "Provided an API key without an email for authentication. Please pass in 'apiKey' and 'email' to the action."
 fi
 
-if [ -z "$INPUT_APIKEY" ] && [ -n "$INPUT_EMAIL" ]
-then
+if [ -z "$INPUT_APIKEY" ] && [ -n "$INPUT_EMAIL" ]; then
   echo "Provided an email without an API key for authentication. Please pass in 'apiKey' and 'email' to the action."
   exit 1
 fi
 
-if [ -z "$API_CREDENTIALS" ]
-then
-  >&2 echo "Unable to find authentication details. Please pass in an 'apiToken' as an input to the action, or a legacy 'apiKey' and 'email'."
+if [ -z "$API_CREDENTIALS" ]; then
+  echo >&2 "Unable to find authentication details. Please pass in an 'apiToken' as an input to the action, or a legacy 'apiKey' and 'email'."
   exit 1
 else
   echo "Using $API_CREDENTIALS authentication"
 fi
 
 # If a working directory is detected as input
-if [ -n "$INPUT_WORKINGDIRECTORY" ]
-then
+if [ -n "$INPUT_WORKINGDIRECTORY" ]; then
   cd "$INPUT_WORKINGDIRECTORY"
 fi
 
 # If precommands is detected as input
-if [ -n "$INPUT_PRECOMMANDS" ]
-then
+if [ -n "$INPUT_PRECOMMANDS" ]; then
   execute_commands "$INPUT_PRECOMMANDS"
 fi
 
@@ -133,7 +131,7 @@ done
 if [ -z "$INPUT_COMMAND" ]; then
   echo "::notice:: No command was provided, defaulting to 'publish'"
 
- if [ -z "$INPUT_ENVIRONMENT" ]; then
+  if [ -z "$INPUT_ENVIRONMENT" ]; then
     wrangler publish
   else
     wrangler publish --env "$INPUT_ENVIRONMENT"
@@ -148,14 +146,12 @@ else
 fi
 
 # If postcommands is detected as input
-if [ -n "$INPUT_POSTCOMMANDS" ]
-then
+if [ -n "$INPUT_POSTCOMMANDS" ]; then
   execute_commands "$INPUT_POSTCOMMANDS"
 fi
 
 # If a working directory is detected as input, revert to the
 # original directory before continuing with the workflow
-if [ -n "$INPUT_WORKINGDIRECTORY" ]
-then
+if [ -n "$INPUT_WORKINGDIRECTORY" ]; then
   cd $HOME
 fi
